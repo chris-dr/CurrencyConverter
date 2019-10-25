@@ -47,6 +47,7 @@ dependencies {
     implementation ext.logging_interceptor
 
     implementation ext.room.runtime
+    implementation ext.room.rx_java
     kapt ext.room.compiler
 
     implementation ext.glide

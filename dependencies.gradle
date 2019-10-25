@@ -10,9 +10,10 @@ ext {
     arch = "androidx.lifecycle:lifecycle-extensions:$archVersion"
     arch_viewmodel_ktx = "androidx.lifecycle:lifecycle-viewmodel-ktx:$archVersion"
 
-    roomVersion = '2.1.0'
+    roomVersion = '2.2.1'
     room = [
             runtime : "androidx.room:room-runtime:$roomVersion",
+            rx_java  : "androidx.room:room-rxjava2:$roomVersion",
             compiler: "androidx.room:room-compiler:$roomVersion"
     ]
 

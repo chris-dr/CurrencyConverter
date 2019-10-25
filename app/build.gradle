@@ -43,6 +43,7 @@ dependencies {
 
     implementation ext.retrofit.retrofit
     implementation ext.retrofit.converter_gson
+    implementation ext.retrofit.rxjava_adapter
     implementation ext.logging_interceptor
 
     implementation ext.room.runtime

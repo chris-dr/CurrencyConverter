@@ -3,6 +3,7 @@ package com.drevnitskaya.currencyconverter.application
 import android.app.Application
 import com.drevnitskaya.currencyconverter.BuildConfig
 import com.drevnitskaya.currencyconverter.di.appModule
+import com.drevnitskaya.currencyconverter.di.currencyModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -25,6 +26,6 @@ class CurrencyConverterApp : Application() {
     }
 
     private fun getKoinModules(): List<Module> {
-        return listOf(appModule)
+        return listOf(appModule, currencyModule)
     }
 }

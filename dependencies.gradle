@@ -10,13 +10,6 @@ ext {
     arch = "androidx.lifecycle:lifecycle-extensions:$archVersion"
     arch_viewmodel_ktx = "androidx.lifecycle:lifecycle-viewmodel-ktx:$archVersion"
 
-    roomVersion = '2.2.1'
-    room = [
-            runtime : "androidx.room:room-runtime:$roomVersion",
-            rx_java  : "androidx.room:room-rxjava2:$roomVersion",
-            compiler: "androidx.room:room-compiler:$roomVersion"
-    ]
-
     koinVersion = '2.0.1'
     koin = "org.koin:koin-android:$koinVersion"
     koin_viewmodel = "org.koin:koin-android-viewmodel:$koinVersion"
@@ -33,6 +26,8 @@ ext {
     ]
     gson = 'com.google.code.gson:gson:2.8.5'
     logging_interceptor = "com.squareup.okhttp3:logging-interceptor:3.12.2"
+
+    rxandroid = 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
     ktx = 'androidx.core:core-ktx:1.1.0'
 

@@ -46,11 +46,9 @@ dependencies {
     implementation ext.retrofit.rxjava_adapter
     implementation ext.logging_interceptor
 
-    implementation ext.room.runtime
-    implementation ext.room.rx_java
-    kapt ext.room.compiler
-
     implementation ext.glide
     kapt ext.glide_kapt
     implementation rounded_imageview
+
+    implementation ext.rxandroid
 }

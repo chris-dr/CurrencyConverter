@@ -1,13 +1,10 @@
 package com.drevnitskaya.currencyconverter.di
 
-import androidx.room.Room
 import com.drevnitskaya.currencyconverter.BuildConfig
 import com.drevnitskaya.currencyconverter.data.source.remote.CurrencyRemoteSource
 import com.drevnitskaya.currencyconverter.framework.api.BaseOkHttpClientBuilder
 import com.drevnitskaya.currencyconverter.framework.api.BASE_URL_CONVERTER
 import com.drevnitskaya.currencyconverter.framework.api.BaseRetrofitClientFactory
-import com.drevnitskaya.currencyconverter.framework.db.CurrencyRateDataBase
-import com.drevnitskaya.currencyconverter.framework.db.DATA_BASE_NAME
 import okhttp3.Interceptor
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.qualifier.named
@@ -52,14 +49,6 @@ val appModule = module {
             converterFactory = get(),
             baseUrl = get(named(DI_NAME_BASE_URL)),
             interceptors = get()
-        ).build()
-    }
-
-    single<CurrencyRateDataBase> {
-        Room.databaseBuilder(
-            get(),
-            CurrencyRateDataBase::class.java,
-            DATA_BASE_NAME
         ).build()
     }
 }

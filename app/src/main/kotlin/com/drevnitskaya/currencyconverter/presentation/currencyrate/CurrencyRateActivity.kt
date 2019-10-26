@@ -33,8 +33,8 @@ class CurrencyRateActivity : AppCompatActivity() {
         viewModel.setRates.observe(this, Observer { rates ->
             adapterCurrency.items = rates
         })
-        viewModel.notifyItemUpdated.observe(this, Observer { idx ->
-            adapterCurrency.notifyItemChanged(idx)
+        viewModel.notifyItemsRangeUpdated.observe(this, Observer { wrapper ->
+            adapterCurrency.notifyItemRangeChanged(wrapper.fromPosition, wrapper.count)
         })
         viewModel.notifyItemMoved.observe(this, Observer { wrapper ->
             val toPosition = wrapper.toPosition

@@ -16,6 +16,10 @@ class CurrencyRateAdapter(
 ) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyRateHolder>() {
     var items: List<CurrencyItemWrapper> = emptyList()
 
+    init {
+        setHasStableIds(true)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CurrencyRateHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_currency_rate, parent, false)
@@ -23,6 +27,10 @@ class CurrencyRateAdapter(
     }
 
     override fun getItemCount(): Int = items.size
+
+    override fun getItemId(position: Int): Long {
+        return items[position].currencyCode.hashCode().toLong()
+    }
 
     override fun onBindViewHolder(holder: CurrencyRateHolder, position: Int) {
         holder.bind(items[position])
@@ -35,7 +43,12 @@ class CurrencyRateAdapter(
                     onCurrencyClicked(items[adapterPosition])
                 }
             }
-            itemView.currencyAmount.doOnTextChanged { text, start, count, after ->
+            itemView.currencyAmount.setOnFocusChangeListener { _, hasFocus ->
+                if (adapterPosition != RecyclerView.NO_POSITION && adapterPosition != 0 && hasFocus) {
+                    onCurrencyClicked(items[adapterPosition])
+                }
+            }
+            itemView.currencyAmount.doOnTextChanged { text, _, _, _ ->
                 if (adapterPosition == 0) {
                     onValueUpdated(text.toString())
                 }
@@ -44,15 +57,14 @@ class CurrencyRateAdapter(
 
         fun bind(item: CurrencyItemWrapper) = with(itemView) {
             if (item.isSelected) {
-                currencyAmount.isFocusable = true
-                currencyAmount.isFocusableInTouchMode = true
+                currencyAmount.requestFocus()
             } else {
-                currencyAmount.isFocusable = false
-                currencyAmount.isFocusableInTouchMode = false
                 currencyAmount.clearFocus()
             }
             testText.text = "${item.currencyCode}"
             currencyAmount.setText("${item.amount}")
+            val pos = item.amount.toString().length
+            currencyAmount.setSelection(pos)
         }
     }
 }

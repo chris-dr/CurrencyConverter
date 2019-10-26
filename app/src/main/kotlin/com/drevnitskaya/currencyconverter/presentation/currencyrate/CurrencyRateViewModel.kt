@@ -4,8 +4,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.drevnitskaya.currencyconverter.data.entities.CurrencyItemWrapper
 import com.drevnitskaya.currencyconverter.domain.FetchRateUseCase
-import io.reactivex.Flowable
+import com.drevnitskaya.currencyconverter.extensions.addTo
+import com.drevnitskaya.currencyconverter.extensions.round
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -19,6 +22,7 @@ private const val DEBOUNCE_TIMEOUT_MS = 300L
 private const val BASE_CURRENCY_POSITION = 0
 
 class ItemMoveWrapper(var fromPosition: Int, var toPosition: Int)
+class ItemsRangeWrapper(var fromPosition: Int, var count: Int)
 
 class CurrencyRateViewModel(
     private val fetchRateUseCase: FetchRateUseCase
@@ -26,7 +30,7 @@ class CurrencyRateViewModel(
     val updateRates = MutableLiveData<List<CurrencyItemWrapper>>()
     val setRates = MutableLiveData<List<CurrencyItemWrapper>>()
     val notifyItemMoved = MutableLiveData<ItemMoveWrapper>()
-    val notifyItemUpdated = MutableLiveData<Int>()
+    val notifyItemsRangeUpdated = MutableLiveData<ItemsRangeWrapper>()
 
     private var actualRatesMap = mapOf<String, Double>()
     private var currencyValues = LinkedList<CurrencyItemWrapper>()
@@ -37,13 +41,15 @@ class CurrencyRateViewModel(
     }
 
     private var initialLoading = true
-    private var updRatesDisp: Disposable? = null
+    private var updRatesDisposable: Disposable? = null
+    private var disposeBag = CompositeDisposable()
     private var currInputSubject = PublishSubject.create<String>()
         .apply {
             debounce(DEBOUNCE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             distinctUntilChanged()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ input -> reCalculateValues(input) }, { /*do nothing*/ })
+                .addTo(disposeBag)
         }
 
     init {
@@ -52,12 +58,12 @@ class CurrencyRateViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        updRatesDisp?.dispose()
+        disposeBag.clear()
+        updRatesDisposable?.dispose()
     }
 
     private fun fetchRates() {
-        updRatesDisp = Flowable.interval(PERIOD_RATES_UPDATING_MS, TimeUnit.MILLISECONDS)
-            .onBackpressureLatest()
+        updRatesDisposable = Observable.interval(PERIOD_RATES_UPDATING_MS, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.io())
             .flatMapSingle {
                 fetchRateUseCase.execute(currencyCode = baseCurrency.currencyCode)
@@ -81,13 +87,12 @@ class CurrencyRateViewModel(
     }
 
     fun onCurrencyClicked(newBaseCurrency: CurrencyItemWrapper) {
-        updRatesDisp?.dispose()
+        updRatesDisposable?.dispose()
 
         newBaseCurrency.isSelected = true
         val selectedCurrPosition = currencyValues.indexOf(newBaseCurrency)
         this.baseCurrency.isSelected = false
         this.baseCurrency = newBaseCurrency
-
 
         currencyValues.removeAt(selectedCurrPosition)
         currencyValues.addFirst(newBaseCurrency)
@@ -96,6 +101,10 @@ class CurrencyRateViewModel(
         notifyItemMoved.value = ItemMoveWrapper(
             fromPosition = selectedCurrPosition,
             toPosition = BASE_CURRENCY_POSITION
+        )
+        notifyItemsRangeUpdated.value = ItemsRangeWrapper(
+            fromPosition = BASE_CURRENCY_POSITION,
+            count = 2
         )
 
         fetchRates()
@@ -133,7 +142,7 @@ class CurrencyRateViewModel(
     }
 
     private fun reCalculateValues(input: String) {
-        updRatesDisp?.dispose()
+        updRatesDisposable?.dispose()
         baseCurrency.amount = if (input.isEmpty()) 0.0 else input.toDouble()
         updateExistingValues()
 
@@ -142,5 +151,3 @@ class CurrencyRateViewModel(
         fetchRates()
     }
 }
-
-fun Double.round(decimals: Int = 2): Double = "%.${decimals}f".format(this).toDouble()

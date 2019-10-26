@@ -26,24 +26,26 @@ class CurrencyRateActivity : AppCompatActivity() {
     }
 
     private fun initViewModel() {
-        viewModel.setRates.observe(this, Observer { rates ->
-            adapterCurrency.items = rates
-        })
-        viewModel.notifyItemRangeUpdated.observe(this, Observer { wrapper ->
-            adapterCurrency.notifyItemRangeChanged(wrapper.fromPosition, wrapper.count)
-        })
-        viewModel.notifyItemRangeAmountUpdated.observe(this, Observer { wrapper ->
-            adapterCurrency.notifyItemRangeChanged(
-                wrapper.fromPosition,
-                wrapper.count,
-                wrapper.newAmounts
-            )
-        })
-        viewModel.notifyItemMoved.observe(this, Observer { wrapper ->
-            val toPosition = wrapper.toPosition
-            testRecyclerView.scrollToPosition(toPosition)
-            adapterCurrency.notifyItemMoved(wrapper.fromPosition, wrapper.toPosition)
-        })
+        viewModel.apply {
+            setRates.observe(this@CurrencyRateActivity, Observer { rates ->
+                adapterCurrency.items = rates
+            })
+            notifyItemRangeUpdated.observe(this@CurrencyRateActivity, Observer { wrapper ->
+                adapterCurrency.notifyItemRangeChanged(wrapper.fromPosition, wrapper.count)
+            })
+            notifyItemRangeAmountUpdated.observe(this@CurrencyRateActivity, Observer { wrapper ->
+                adapterCurrency.notifyItemRangeChanged(
+                    wrapper.fromPosition,
+                    wrapper.count,
+                    wrapper.newAmounts
+                )
+            })
+            notifyItemMoved.observe(this@CurrencyRateActivity, Observer { wrapper ->
+                val toPosition = wrapper.toPosition
+                testRecyclerView.scrollToPosition(toPosition)
+                adapterCurrency.notifyItemMoved(wrapper.fromPosition, wrapper.toPosition)
+            })
+        }
     }
 
     private fun initViews() {

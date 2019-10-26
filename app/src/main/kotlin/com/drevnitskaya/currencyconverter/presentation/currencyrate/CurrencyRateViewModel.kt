@@ -15,7 +15,7 @@ import io.reactivex.subjects.PublishSubject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-private const val DEFAULT_CURRENCY_CODE = "EUR"
+private const val DEFAULT_BASE_CURRENCY_CODE = "EUR"
 private const val DEFAULT_BASE_AMOUNT = 100.0
 private const val PERIOD_RATES_UPDATING_MS = 1000L
 private const val DEBOUNCE_TIMEOUT_MS = 300L
@@ -35,7 +35,7 @@ class CurrencyRateViewModel(
     private var actualRatesMap = mapOf<String, Double>()
     private var currencyValues = LinkedList<CurrencyItemWrapper>()
     private var baseCurrency = CurrencyItemWrapper().apply {
-        currencyCode = DEFAULT_CURRENCY_CODE
+        currencyCode = DEFAULT_BASE_CURRENCY_CODE
         amount = DEFAULT_BASE_AMOUNT
         isSelected = true
     }

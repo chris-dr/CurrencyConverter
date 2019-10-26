@@ -2,4 +2,5 @@
     <string name="app_name">CurrencyConverter</string>
     <string name="shared_noNetworkError_msg">No nerwork!</string>
     <string name="shared_generalError_msg">General error!</string>
+    <string name="currency_offlineMode_msg">You\'re in offline mode.\nTo get the most accurate rate please check your Network connection</string>
 </resources>

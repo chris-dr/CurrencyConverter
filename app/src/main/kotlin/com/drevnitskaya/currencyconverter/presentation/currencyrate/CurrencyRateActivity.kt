@@ -25,7 +25,6 @@ class CurrencyRateActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         viewModel.resumeRateRefreshing()
-
     }
 
     override fun onStop() {
@@ -68,6 +67,14 @@ class CurrencyRateActivity : AppCompatActivity() {
                 val toPosition = wrapper.toPosition
                 currencyRecyclerView.scrollToPosition(toPosition)
                 adapterCurrency.notifyItemMoved(wrapper.fromPosition, wrapper.toPosition)
+            })
+            showOfflineMode.observe(this@CurrencyRateActivity, Observer { shouldShow ->
+                TransitionManager.beginDelayedTransition(currencyRoot)
+                currencyOfflineMode.visibility = if (shouldShow) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             })
         }
     }

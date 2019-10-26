@@ -17,6 +17,10 @@ class CurrencyRateAdapter(
 ) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyRateHolder>() {
     var items: List<CurrencyItemWrapper> = emptyList()
 
+    init {
+        setHasStableIds(true)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CurrencyRateHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_currency_rate, parent, false)
@@ -24,6 +28,10 @@ class CurrencyRateAdapter(
     }
 
     override fun getItemCount(): Int = items.size
+
+    override fun getItemId(position: Int): Long {
+        return items[position].currencyCode.hashCode().toLong()
+    }
 
     override fun onBindViewHolder(holder: CurrencyRateHolder, position: Int) {
         holder.bind(items[position])
@@ -51,11 +59,11 @@ class CurrencyRateAdapter(
                     onCurrencyClicked(items[adapterPosition])
                 }
             }
-            itemView.currencyAmount.setOnFocusChangeListener { _, hasFocus ->
-                if (adapterPosition != RecyclerView.NO_POSITION && adapterPosition != BASE_CURRENCY_POSITION && hasFocus) {
-                    onCurrencyClicked(items[adapterPosition])
-                }
-            }
+//            itemView.currencyAmount.setOnFocusChangeListener { _, hasFocus ->
+//                if (adapterPosition != RecyclerView.NO_POSITION && adapterPosition != BASE_CURRENCY_POSITION && hasFocus) {
+//                    onCurrencyClicked(items[adapterPosition])
+//                }
+//            }
             itemView.currencyAmount.doOnTextChanged { text, _, _, _ ->
                 if (adapterPosition == BASE_CURRENCY_POSITION) {
                     onValueUpdated(text.toString())

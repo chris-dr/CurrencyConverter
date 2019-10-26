@@ -1,15 +1,17 @@
 package com.drevnitskaya.currencyconverter.presentation.currencyrate
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.drevnitskaya.currencyconverter.R
 import com.drevnitskaya.currencyconverter.data.entities.CurrencyItemWrapper
+import com.drevnitskaya.currencyconverter.data.entities.ErrorHolder
+import com.drevnitskaya.currencyconverter.data.entities.MoveItemHolder
+import com.drevnitskaya.currencyconverter.data.entities.UpdItemRangeHolder
 import com.drevnitskaya.currencyconverter.domain.FetchRateUseCase
 import com.drevnitskaya.currencyconverter.extensions.addTo
 import com.drevnitskaya.currencyconverter.extensions.round
 import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.BASE_CURRENCY_POSITION
 import com.drevnitskaya.currencyconverter.utils.NetworkStateProvider
+import com.drevnitskaya.currencyconverter.utils.SingleLiveEvent
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -24,13 +26,6 @@ private const val DEFAULT_BASE_AMOUNT = 100.0
 private const val PERIOD_RATES_UPDATING_MS = 1000L
 private const val DEBOUNCE_TIMEOUT_MS = 300L
 
-class ItemMoveWrapper(var fromPosition: Int, var toPosition: Int)
-class ItemRangeWrapper(var fromPosition: Int, var count: Int, var newAmounts: List<Double>? = null)
-sealed class ErrorHolder(@StringRes val errorMsgResId: Int) {
-    class NetworkError : ErrorHolder(R.string.shared_noNetworkError_msg)
-    class GeneralError : ErrorHolder(R.string.shared_generalError_msg)
-}
-
 class CurrencyRateViewModel(
     private val networkStateProvider: NetworkStateProvider,
     private val fetchRateUseCase: FetchRateUseCase
@@ -38,9 +33,10 @@ class CurrencyRateViewModel(
     val showProgress = MutableLiveData<Boolean>()
     val showErrorState = MutableLiveData<ErrorHolder>()
     val setCalculatedValues = MutableLiveData<List<CurrencyItemWrapper>>()
-    val notifyItemMoved = MutableLiveData<ItemMoveWrapper>()
-    val notifyItemRangeUpdated = MutableLiveData<ItemRangeWrapper>()
-    val notifyItemRangeAmountUpdated = MutableLiveData<ItemRangeWrapper>()
+    val notifyItemMoved = SingleLiveEvent<MoveItemHolder>()
+    val notifyItemRangeUpdated = SingleLiveEvent<UpdItemRangeHolder>()
+    val notifyItemRangeAmountUpdated = SingleLiveEvent<UpdItemRangeHolder>()
+    val showOfflineMode = MutableLiveData<Boolean>()
 
     private var actualRatesMap = mapOf<String, Double>()
     private var currencyValues = LinkedList<CurrencyItemWrapper>()
@@ -76,7 +72,7 @@ class CurrencyRateViewModel(
         if (networkStateProvider.isNetworkAvailable()) {
             showErrorState.value = null
             showProgress.value = true
-            fetchRates()
+            getRatesUpdate()
         } else {
             showErrorState.value = ErrorHolder.NetworkError()
         }
@@ -94,16 +90,16 @@ class CurrencyRateViewModel(
         currencyValues.addFirst(newBaseCurrency)
 
         setCalculatedValues.value = currencyValues
-        notifyItemMoved.value = ItemMoveWrapper(
+        notifyItemMoved.value = MoveItemHolder(
             fromPosition = selectedCurrPosition,
             toPosition = BASE_CURRENCY_POSITION
         )
-        notifyItemRangeUpdated.value = ItemRangeWrapper(
+        notifyItemRangeUpdated.value = UpdItemRangeHolder(
             fromPosition = BASE_CURRENCY_POSITION,
             count = 2
         )
 
-        fetchRates()
+        getRatesUpdate()
     }
 
     fun onValueUpdated(input: String) {
@@ -111,19 +107,23 @@ class CurrencyRateViewModel(
     }
 
     fun stopRateRefreshing() {
-        updRatesDisposable?.dispose()
+//        updRatesDisposable?.dispose()
     }
 
     fun resumeRateRefreshing() {
-        if (updRatesDisposable == null || updRatesDisposable?.isDisposed == true) {
-            fetchRates()
-        }
+//        if (updRatesDisposable == null || updRatesDisposable?.isDisposed == true) {
+//            getRatesUpdate()
+//        }
     }
 
-    private fun fetchRates() {
+    private fun getRatesUpdate() {
         updRatesDisposable = Observable.interval(PERIOD_RATES_UPDATING_MS, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.io())
-            .filter { networkStateProvider.isNetworkAvailable() }
+            .filter {
+                val isOnline = networkStateProvider.isNetworkAvailable()
+                showOfflineMode.postValue(isOnline.not())
+                isOnline
+            }
             .flatMapSingle { fetchRateUseCase.execute(currencyCode = baseCurrency.currencyCode) }
             .observeOn(Schedulers.computation())
             .map { rateResponse ->
@@ -142,9 +142,7 @@ class CurrencyRateViewModel(
                 updateAmounts()
             }, {
                 showProgress.value = true
-                if (currencyValues.isEmpty()) {
-                    showErrorState.value = ErrorHolder.GeneralError()
-                }
+                showErrorState.value = ErrorHolder.GeneralError()
             })
     }
 
@@ -180,14 +178,14 @@ class CurrencyRateViewModel(
 
         updateAmounts()
 
-        fetchRates()
+        getRatesUpdate()
     }
 
     private fun updateAmounts() {
         setCalculatedValues.value = currencyValues
         val newAmounts = currencyValues.subList(1, currencyValues.size).map { it.amount.round() }
         notifyItemRangeAmountUpdated.value =
-            ItemRangeWrapper(
+            UpdItemRangeHolder(
                 fromPosition = 1,
                 count = currencyValues.size,
                 newAmounts = newAmounts

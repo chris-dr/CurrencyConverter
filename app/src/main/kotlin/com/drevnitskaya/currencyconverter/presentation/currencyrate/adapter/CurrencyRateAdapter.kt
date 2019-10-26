@@ -3,6 +3,7 @@ package com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.drevnitskaya.currencyconverter.R
 import com.drevnitskaya.currencyconverter.data.entities.CurrencyItemWrapper
@@ -10,7 +11,8 @@ import kotlinx.android.synthetic.main.item_currency_rate.view.*
 
 
 class CurrencyRateAdapter(
-    private val onCurrencyClicked: (item: CurrencyItemWrapper) -> Unit
+    private val onCurrencyClicked: (item: CurrencyItemWrapper) -> Unit,
+    private val onValueUpdated: (value: String) -> Unit
 ) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyRateHolder>() {
     var items: List<CurrencyItemWrapper> = emptyList()
 
@@ -31,6 +33,11 @@ class CurrencyRateAdapter(
             itemView.setOnClickListener {
                 if (adapterPosition != RecyclerView.NO_POSITION) {
                     onCurrencyClicked(items[adapterPosition])
+                }
+            }
+            itemView.currencyAmount.doOnTextChanged { text, start, count, after ->
+                if (adapterPosition == 0) {
+                    onValueUpdated(text.toString())
                 }
             }
         }

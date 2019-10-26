@@ -12,9 +12,11 @@ import org.koin.android.viewmodel.ext.android.viewModel
 class CurrencyRateActivity : AppCompatActivity() {
     private val viewModel: CurrencyRateViewModel by viewModel()
     private val adapterCurrency =
-        CurrencyRateAdapter {
-            viewModel.onCurrencyClicked(it)
-        }
+        CurrencyRateAdapter(onCurrencyClicked = { item ->
+            viewModel.onCurrencyClicked(item)
+        }, onValueUpdated = { input ->
+            viewModel.onValueUpdated(input)
+        })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +37,8 @@ class CurrencyRateActivity : AppCompatActivity() {
             adapterCurrency.notifyItemChanged(idx)
         })
         viewModel.notifyItemMoved.observe(this, Observer { wrapper ->
-            testRecyclerView.scrollToPosition(0)
+            val toPosition = wrapper.toPosition
+            testRecyclerView.scrollToPosition(toPosition)
             adapterCurrency.notifyItemMoved(wrapper.fromPosition, wrapper.toPosition)
         })
     }

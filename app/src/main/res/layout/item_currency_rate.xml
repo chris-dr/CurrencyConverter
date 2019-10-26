@@ -24,6 +24,8 @@
         android:layout_marginEnd="16dp"
         android:focusable="false"
         android:focusableInTouchMode="false"
+        android:hint="0.00"
+        android:inputType="number"
         android:minWidth="70dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/testText"

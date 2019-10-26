@@ -26,20 +26,12 @@ class CurrencyRateActivity : AppCompatActivity() {
     }
 
     private fun initViewModel() {
-//        viewModel.updateRates.observe(this, Observer { rates ->
-//            adapterCurrency.items = rates
-//            val payloads = rates.subList(1, rates.size).map { it.amount }
-//            adapterCurrency.notifyItemRangeChanged(1, rates.size, payloads)
-//        })
         viewModel.setRates.observe(this, Observer { rates ->
             adapterCurrency.items = rates
         })
         viewModel.notifyItemRangeUpdated.observe(this, Observer { wrapper ->
             adapterCurrency.notifyItemRangeChanged(wrapper.fromPosition, wrapper.count)
         })
-//        viewModel.notifyItemRangeAmountUpdated.observe(this, Observer { wrapper ->
-//            adapterCurrency.notifyItemRangeChanged(wrapper.fromPosition, wrapper.count)
-//        })
         viewModel.notifyItemRangeAmountUpdated.observe(this, Observer { wrapper ->
             adapterCurrency.notifyItemRangeChanged(
                 wrapper.fromPosition,

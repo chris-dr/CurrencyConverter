@@ -27,7 +27,6 @@ class ItemRangeWrapper(var fromPosition: Int, var count: Int, var newAmounts: Li
 class CurrencyRateViewModel(
     private val fetchRateUseCase: FetchRateUseCase
 ) : ViewModel() {
-//    val updateRates = MutableLiveData<List<CurrencyItemWrapper>>()
     val setRates = MutableLiveData<List<CurrencyItemWrapper>>()
     val notifyItemMoved = MutableLiveData<ItemMoveWrapper>()
     val notifyItemRangeUpdated = MutableLiveData<ItemRangeWrapper>()
@@ -81,15 +80,7 @@ class CurrencyRateViewModel(
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                setRates.value = currencyValues
-                val newAmounts = currencyValues.subList(1, currencyValues.size).map { it.amount }
-                notifyItemRangeAmountUpdated.value =
-                    ItemRangeWrapper(
-                        fromPosition = 1,
-                        count = currencyValues.size,
-                        newAmounts = newAmounts
-                    )
-//                updateRates.value = currencyValues
+                updateAmounts()
             }, {
                 it.printStackTrace()
             })
@@ -155,16 +146,19 @@ class CurrencyRateViewModel(
         baseCurrency.amount = if (input.isEmpty()) 0.0 else input.toDouble()
         updateExistingValues()
 
+        updateAmounts()
+
+        fetchRates()
+    }
+
+    private fun updateAmounts() {
         setRates.value = currencyValues
-        val newAmounts = currencyValues.subList(1, currencyValues.size).map { it.amount }
+        val newAmounts = currencyValues.subList(1, currencyValues.size).map { it.amount.round() }
         notifyItemRangeAmountUpdated.value =
             ItemRangeWrapper(
                 fromPosition = 1,
                 count = currencyValues.size,
                 newAmounts = newAmounts
             )
-//        updateRates.value = currencyValues
-
-        fetchRates()
     }
 }

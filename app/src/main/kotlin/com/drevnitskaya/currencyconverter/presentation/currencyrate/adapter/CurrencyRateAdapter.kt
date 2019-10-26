@@ -36,6 +36,19 @@ class CurrencyRateAdapter(
         holder.bind(items[position])
     }
 
+    override fun onBindViewHolder(
+        holder: CurrencyRateHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty() || position == 0) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            val amount = (payloads[0] as ArrayList<*>)[position] as Double
+            holder.updateAmount(amount)
+        }
+    }
+
     inner class CurrencyRateHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         init {
             itemView.setOnClickListener {
@@ -65,6 +78,10 @@ class CurrencyRateAdapter(
             currencyAmount.setText("${item.amount}")
             val pos = item.amount.toString().length
             currencyAmount.setSelection(pos)
+        }
+
+        fun updateAmount(amount: Double) {
+            itemView.currencyAmount.setText("$amount")
         }
     }
 }

@@ -22,15 +22,16 @@ private const val DEBOUNCE_TIMEOUT_MS = 300L
 private const val BASE_CURRENCY_POSITION = 0
 
 class ItemMoveWrapper(var fromPosition: Int, var toPosition: Int)
-class ItemsRangeWrapper(var fromPosition: Int, var count: Int)
+class ItemRangeWrapper(var fromPosition: Int, var count: Int, var newAmounts: List<Double>? = null)
 
 class CurrencyRateViewModel(
     private val fetchRateUseCase: FetchRateUseCase
 ) : ViewModel() {
-    val updateRates = MutableLiveData<List<CurrencyItemWrapper>>()
+//    val updateRates = MutableLiveData<List<CurrencyItemWrapper>>()
     val setRates = MutableLiveData<List<CurrencyItemWrapper>>()
     val notifyItemMoved = MutableLiveData<ItemMoveWrapper>()
-    val notifyItemsRangeUpdated = MutableLiveData<ItemsRangeWrapper>()
+    val notifyItemRangeUpdated = MutableLiveData<ItemRangeWrapper>()
+    val notifyItemRangeAmountUpdated = MutableLiveData<ItemRangeWrapper>()
 
     private var actualRatesMap = mapOf<String, Double>()
     private var currencyValues = LinkedList<CurrencyItemWrapper>()
@@ -80,7 +81,15 @@ class CurrencyRateViewModel(
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                updateRates.value = currencyValues
+                setRates.value = currencyValues
+                val newAmounts = currencyValues.subList(1, currencyValues.size).map { it.amount }
+                notifyItemRangeAmountUpdated.value =
+                    ItemRangeWrapper(
+                        fromPosition = 1,
+                        count = currencyValues.size,
+                        newAmounts = newAmounts
+                    )
+//                updateRates.value = currencyValues
             }, {
                 it.printStackTrace()
             })
@@ -102,7 +111,7 @@ class CurrencyRateViewModel(
             fromPosition = selectedCurrPosition,
             toPosition = BASE_CURRENCY_POSITION
         )
-        notifyItemsRangeUpdated.value = ItemsRangeWrapper(
+        notifyItemRangeUpdated.value = ItemRangeWrapper(
             fromPosition = BASE_CURRENCY_POSITION,
             count = 2
         )
@@ -146,7 +155,15 @@ class CurrencyRateViewModel(
         baseCurrency.amount = if (input.isEmpty()) 0.0 else input.toDouble()
         updateExistingValues()
 
-        updateRates.value = currencyValues
+        setRates.value = currencyValues
+        val newAmounts = currencyValues.subList(1, currencyValues.size).map { it.amount }
+        notifyItemRangeAmountUpdated.value =
+            ItemRangeWrapper(
+                fromPosition = 1,
+                count = currencyValues.size,
+                newAmounts = newAmounts
+            )
+//        updateRates.value = currencyValues
 
         fetchRates()
     }

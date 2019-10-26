@@ -12,12 +12,6 @@ import kotlinx.android.synthetic.main.item_currency_rate.view.*
 class CurrencyRateAdapter(
     private val onCurrencyClicked: (item: CurrencyItemWrapper) -> Unit
 ) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyRateHolder>() {
-
-    /*var items: List<CurrencyItemWrapper> by Delegates.observable(emptyList()) { _, oldItems, newItems ->
-        val callback = CurrencyFieldDiffCallback(oldItems, newItems)
-        val diffResult = DiffUtil.calculateDiff(callback)
-        diffResult.dispatchUpdatesTo(this)
-    }*/
     var items: List<CurrencyItemWrapper> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CurrencyRateHolder {
@@ -31,19 +25,6 @@ class CurrencyRateAdapter(
     override fun onBindViewHolder(holder: CurrencyRateHolder, position: Int) {
         holder.bind(items[position])
     }
-
-    /*override fun onBindViewHolder(
-        holder: CurrencyRateHolder,
-        position: Int,
-        payloads: MutableList<Any>
-    ) {
-        if (payloads.isNotEmpty()) {
-            val amount = (payloads[0] as Float)
-            holder.updateAmount(amount)
-        } else {
-            super.onBindViewHolder(holder, position, payloads)
-        }
-    }*/
 
     inner class CurrencyRateHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         init {
@@ -66,9 +47,5 @@ class CurrencyRateAdapter(
             testText.text = "${item.currencyCode}"
             currencyAmount.setText("${item.amount}")
         }
-
-        /*fun updateAmount(amount: Float) {
-            itemView.currencyAmount.setText("$amount")
-        }*/
     }
 }

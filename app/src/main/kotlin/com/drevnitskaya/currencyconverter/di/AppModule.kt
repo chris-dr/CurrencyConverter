@@ -5,6 +5,8 @@ import com.drevnitskaya.currencyconverter.data.source.remote.CurrencyRemoteSourc
 import com.drevnitskaya.currencyconverter.framework.api.BaseOkHttpClientBuilder
 import com.drevnitskaya.currencyconverter.framework.api.BASE_URL_CONVERTER
 import com.drevnitskaya.currencyconverter.framework.api.BaseRetrofitClientFactory
+import com.drevnitskaya.currencyconverter.utils.NetworkStateProvider
+import com.drevnitskaya.currencyconverter.utils.NetworkStateProviderImpl
 import okhttp3.Interceptor
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.qualifier.named
@@ -51,4 +53,6 @@ val appModule = module {
             interceptors = get()
         ).build()
     }
+
+    single<NetworkStateProvider> { NetworkStateProviderImpl(context = get()) }
 }

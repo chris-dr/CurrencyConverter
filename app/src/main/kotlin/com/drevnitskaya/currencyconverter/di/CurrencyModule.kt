@@ -18,6 +18,6 @@ val currencyModule = module {
     factory<FetchRateUseCase> { FetchRateUseCaseImpl(currencyRepository = get()) }
 
     viewModel {
-        CurrencyRateViewModel(fetchRateUseCase = get())
+        CurrencyRateViewModel(networkStateProvider = get(), fetchRateUseCase = get())
     }
 }

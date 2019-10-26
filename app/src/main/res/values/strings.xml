@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CurrencyConverter</string>
+    <string name="shared_noNetworkError_msg">No nerwork!</string>
+    <string name="shared_generalError_msg">General error!</string>
 </resources>

@@ -2,6 +2,8 @@ package com.drevnitskaya.currencyconverter.presentation.currencyrate
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.transition.TransitionManager
+import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.drevnitskaya.currencyconverter.R
@@ -11,12 +13,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class CurrencyRateActivity : AppCompatActivity() {
     private val viewModel: CurrencyRateViewModel by viewModel()
-    private val adapterCurrency =
-        CurrencyRateAdapter(onCurrencyClicked = { item ->
-            viewModel.onCurrencyClicked(item)
-        }, onValueUpdated = { input ->
-            viewModel.onValueUpdated(input)
-        })
+    private lateinit var adapterCurrency: CurrencyRateAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,9 +22,36 @@ class CurrencyRateActivity : AppCompatActivity() {
         initViewModel()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.resumeRateRefreshing()
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.stopRateRefreshing()
+    }
+
     private fun initViewModel() {
         viewModel.apply {
-            setRates.observe(this@CurrencyRateActivity, Observer { rates ->
+            showProgress.observe(this@CurrencyRateActivity, Observer { shouldShow ->
+                currencyProgress.visibility = if (shouldShow) View.VISIBLE else View.GONE
+            })
+            showErrorState.observe(this@CurrencyRateActivity, Observer { error ->
+                currencyErrorState.visibility = if (error != null) {
+                    currencyErrorState.setText(error.errorMsgResId)
+                    TransitionManager.beginDelayedTransition(currencyRoot)
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            })
+            setCalculatedValues.observe(this@CurrencyRateActivity, Observer { rates ->
+                if (currencyRecyclerView.visibility == View.GONE) {
+                    TransitionManager.beginDelayedTransition(currencyRoot)
+                    currencyRecyclerView.visibility = View.VISIBLE
+                }
                 adapterCurrency.items = rates
             })
             notifyItemRangeUpdated.observe(this@CurrencyRateActivity, Observer { wrapper ->
@@ -42,16 +66,24 @@ class CurrencyRateActivity : AppCompatActivity() {
             })
             notifyItemMoved.observe(this@CurrencyRateActivity, Observer { wrapper ->
                 val toPosition = wrapper.toPosition
-                testRecyclerView.scrollToPosition(toPosition)
+                currencyRecyclerView.scrollToPosition(toPosition)
                 adapterCurrency.notifyItemMoved(wrapper.fromPosition, wrapper.toPosition)
             })
         }
     }
 
     private fun initViews() {
-        testRecyclerView.apply {
+        adapterCurrency = CurrencyRateAdapter(onCurrencyClicked = { item ->
+            viewModel.onCurrencyClicked(item)
+        }, onValueUpdated = { input ->
+            viewModel.onValueUpdated(input)
+        })
+        currencyRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@CurrencyRateActivity)
             adapter = adapterCurrency
+        }
+        currencyErrorState.setOnClickListener {
+            viewModel.loadRates()
         }
     }
 }

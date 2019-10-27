@@ -7,13 +7,13 @@ import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.drevnitskaya.currencyconverter.R
-import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.CurrencyRateAdapter
+import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.CurrencyConversionAdapter
 import kotlinx.android.synthetic.main.activity_currency_rate.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class CurrencyRateActivity : AppCompatActivity() {
     private val viewModel: CurrencyRateViewModel by viewModel()
-    private lateinit var adapterCurrency: CurrencyRateAdapter
+    private lateinit var adapterCurrency: CurrencyConversionAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +69,7 @@ class CurrencyRateActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        adapterCurrency = CurrencyRateAdapter(onCurrencyClicked = { item ->
+        adapterCurrency = CurrencyConversionAdapter(onCurrencyClicked = { item ->
             viewModel.onCurrencyClicked(item)
         }, onValueUpdated = { input ->
             viewModel.onValueUpdated(input)

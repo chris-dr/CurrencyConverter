@@ -7,6 +7,7 @@ import com.drevnitskaya.currencyconverter.data.entities.ErrorHolder
 import com.drevnitskaya.currencyconverter.domain.FetchRateUseCase
 import com.drevnitskaya.currencyconverter.extensions.addTo
 import com.drevnitskaya.currencyconverter.extensions.round
+import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.BASE_CURRENCY_POSITION
 import com.drevnitskaya.currencyconverter.utils.NetworkStateProvider
 import com.drevnitskaya.currencyconverter.utils.SingleLiveEvent
 import io.reactivex.Observable
@@ -22,6 +23,7 @@ private const val DEFAULT_BASE_CURRENCY_CODE = "EUR"
 private const val DEFAULT_BASE_AMOUNT = 100.0
 private const val PERIOD_RATES_UPDATING_MS = 1000L
 private const val DEBOUNCE_TIMEOUT_MS = 300L
+private const val BASE_CURRENCY_RATE = 1.0
 
 class CurrencyRateViewModel(
     private val networkStateProvider: NetworkStateProvider,
@@ -56,7 +58,7 @@ class CurrencyRateViewModel(
         }
 
     init {
-        actualRatesMap[DEFAULT_BASE_CURRENCY_CODE] = 1.0
+        actualRatesMap[DEFAULT_BASE_CURRENCY_CODE] = BASE_CURRENCY_RATE
         loadRates()
     }
 
@@ -70,7 +72,7 @@ class CurrencyRateViewModel(
         if (networkStateProvider.isNetworkAvailable()) {
             showErrorState.value = null
             showProgress.value = true
-            getRatesUpdate()
+            startRatesUpdating()
         } else {
             showErrorState.value = ErrorHolder.NetworkError()
         }
@@ -82,51 +84,24 @@ class CurrencyRateViewModel(
         val newBaseCurrency = currencyValues[selectedCurrPosition]
         newBaseCurrency.isSelected = true
 
-        //todo: recalculate all
-        /*
-        * base rate was 1.0, calculate new for map!
-        * */
-        //upd old rate from local
-        actualRatesMap[baseCurrency.currencyCode] =
-            1 / (actualRatesMap[newBaseCurrency.currencyCode] ?: 1.0)
-        actualRatesMap[newBaseCurrency.currencyCode] = 1.0
+        val newBaseRate = actualRatesMap[newBaseCurrency.currencyCode] ?: BASE_CURRENCY_RATE
+        val newBaseCurrCode = newBaseCurrency.currencyCode
+        actualRatesMap[baseCurrency.currencyCode] = 1 / newBaseRate
+        actualRatesMap[newBaseCurrCode] = BASE_CURRENCY_RATE
 
         this.baseCurrency = newBaseCurrency
 
-        //todo: test line!
-        val tempPrev = currencyValues[0]
-        val newPrev = CurrencyItemWrapper().apply {
-            this.currencyCode = tempPrev.currencyCode
-            this.amount = tempPrev.amount
-            this.isSelected = false
-        }
-
-        currencyValues[0] = newPrev
+        currencyValues[BASE_CURRENCY_POSITION] = currencyValues[BASE_CURRENCY_POSITION]
+            .copy().apply { isSelected = false }
         currencyValues.removeAt(selectedCurrPosition)
         currencyValues.addFirst(newBaseCurrency)
 
-        //recalc for new rates
         updateExistingValues()
 
-
-//        val tempList = mutableListOf<CurrencyItemWrapper>()
-//        currencyValues.forEach {
-//            val newItem = CurrencyItemWrapper().apply {
-//                this.currencyCode = it.currencyCode
-//                this.amount = it.amount
-//                this.isSelected = it.isSelected
-//            }
-//            tempList.add(newItem)
-//        }
-//
-//        println("Prev base currency in temp list: isSelected - ${currencyValues[1].isSelected}")
-//        println("Prev base currency, amount: - ${currencyValues[1].amount}")
-//
-//        setCalculatedValues.value = tempList
         updateAmounts()
         scrollToBaseCurrency.call()
 
-//        getRatesUpdate()
+        startRatesUpdating()
     }
 
     fun onValueUpdated(input: String) {
@@ -140,12 +115,12 @@ class CurrencyRateViewModel(
     fun resumeRateRefreshing() {
         if (showErrorState.value == null) {
             if (updRatesDisposable == null || updRatesDisposable?.isDisposed == true) {
-                getRatesUpdate()
+                startRatesUpdating()
             }
         }
     }
 
-    private fun getRatesUpdate() {
+    private fun startRatesUpdating() {
         updRatesDisposable = Observable.interval(PERIOD_RATES_UPDATING_MS, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.io())
             .filter {
@@ -196,7 +171,7 @@ class CurrencyRateViewModel(
         currencyValues.forEach { itemWrapper ->
             val currCode = itemWrapper.currencyCode
             if (actualRatesMap.containsKey(currCode) && currCode != baseCurrency.currencyCode) {
-                val amount = (actualRatesMap[currCode] ?: 1.0) * baseCurrency.amount
+                val amount = (actualRatesMap[currCode] ?: BASE_CURRENCY_RATE) * baseCurrency.amount
                 itemWrapper.amount = amount.round()
             }
         }
@@ -209,33 +184,15 @@ class CurrencyRateViewModel(
 
         updateAmounts()
 
-        getRatesUpdate()
+        startRatesUpdating()
     }
 
     private fun updateAmounts() {
         val tempList = mutableListOf<CurrencyItemWrapper>()
-        tempList.add(currencyValues[0])
-        currencyValues.subList(1, currencyValues.size).forEach {
-            val newItem = CurrencyItemWrapper().apply {
-                this.currencyCode = it.currencyCode
-                this.amount = it.amount
-                this.isSelected = it.isSelected
-            }
-            tempList.add(newItem)
+        tempList.add(currencyValues[BASE_CURRENCY_POSITION])
+        currencyValues.subList(BASE_CURRENCY_POSITION + 1, currencyValues.size).forEach {
+            tempList.add(it.copy())
         }
-        println("Prev base currency, selection before assign: ${tempList[1].isSelected}")
         setCalculatedValues.value = tempList
-
-//        val tempList = mutableListOf<CurrencyItemWrapper>()
-//        tempList.add(currencyValues[0])
-//        currencyValues.subList(1, currencyValues.size).forEach {
-//            val newItem = CurrencyItemWrapper().apply {
-//                this.currencyCode = it.currencyCode
-//                this.amount = it.amount
-//                this.isSelected = it.isSelected
-//            }
-//            tempList.add(newItem)
-//        }
-
     }
 }

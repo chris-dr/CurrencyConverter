@@ -6,18 +6,22 @@ import android.transition.TransitionManager
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE
 import com.drevnitskaya.currencyconverter.R
+import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.BASE_CURRENCY_POSITION
 import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.CurrencyConversionAdapter
-import kotlinx.android.synthetic.main.activity_currency_rate.*
+import kotlinx.android.synthetic.main.activity_currency_converter.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class CurrencyRateActivity : AppCompatActivity() {
+class CurrencyConverterActivity : AppCompatActivity() {
     private val viewModel: CurrencyRateViewModel by viewModel()
     private lateinit var adapterCurrency: CurrencyConversionAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_currency_rate)
+        setContentView(R.layout.activity_currency_converter)
         initViews()
         initViewModel()
     }
@@ -34,10 +38,10 @@ class CurrencyRateActivity : AppCompatActivity() {
 
     private fun initViewModel() {
         viewModel.apply {
-            showProgress.observe(this@CurrencyRateActivity, Observer { shouldShow ->
+            showProgress.observe(this@CurrencyConverterActivity, Observer { shouldShow ->
                 currencyProgress.visibility = if (shouldShow) View.VISIBLE else View.GONE
             })
-            showErrorState.observe(this@CurrencyRateActivity, Observer { error ->
+            showErrorState.observe(this@CurrencyConverterActivity, Observer { error ->
                 currencyErrorState.visibility = if (error != null) {
                     currencyErrorState.setText(error.errorMsgResId)
                     TransitionManager.beginDelayedTransition(currencyRoot)
@@ -46,7 +50,7 @@ class CurrencyRateActivity : AppCompatActivity() {
                     View.GONE
                 }
             })
-            setCalculatedValues.observe(this@CurrencyRateActivity, Observer { rates ->
+            setCalculatedAmounts.observe(this@CurrencyConverterActivity, Observer { rates ->
                 if (currencyRecyclerView.visibility == View.GONE) {
                     TransitionManager.beginDelayedTransition(currencyRoot)
                     currencyRecyclerView.visibility = View.VISIBLE
@@ -54,10 +58,10 @@ class CurrencyRateActivity : AppCompatActivity() {
                 adapterCurrency.items = rates
 
             })
-            scrollToBaseCurrency.observe(this@CurrencyRateActivity, Observer {
-                currencyRecyclerView.scrollToPosition(0)
+            scrollToBaseCurrency.observe(this@CurrencyConverterActivity, Observer {
+                currencyRecyclerView.scrollToPosition(BASE_CURRENCY_POSITION)
             })
-            showOfflineMode.observe(this@CurrencyRateActivity, Observer { shouldShow ->
+            showOfflineMode.observe(this@CurrencyConverterActivity, Observer { shouldShow ->
                 TransitionManager.beginDelayedTransition(currencyRoot)
                 currencyOfflineMode.visibility = if (shouldShow) {
                     View.VISIBLE
@@ -71,18 +75,25 @@ class CurrencyRateActivity : AppCompatActivity() {
     private fun initViews() {
         adapterCurrency = CurrencyConversionAdapter(onCurrencyClicked = { item ->
             viewModel.onCurrencyClicked(item)
-        }, onValueUpdated = { input ->
-            viewModel.onValueUpdated(input)
+        }, onBaseAmountUpdated = { input ->
+            viewModel.onBaseAmountUpdated(input)
         })
         currencyRecyclerView.apply {
             val llm = LinearLayoutManager(
-                this@CurrencyRateActivity,
+                this@CurrencyConverterActivity,
                 LinearLayoutManager.VERTICAL, false
             )
-            llm.isItemPrefetchEnabled = false
             layoutManager = llm
             adapter = adapterCurrency
             setHasFixedSize(true)
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    when (newState) {
+                        SCROLL_STATE_DRAGGING -> viewModel.stopRateRefreshing()
+                        SCROLL_STATE_IDLE -> viewModel.resumeRateRefreshing()
+                    }
+                }
+            })
         }
         currencyErrorState.setOnClickListener {
             viewModel.loadRates()

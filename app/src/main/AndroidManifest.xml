@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".presentation.currencyrate.CurrencyRateActivity"
+            android:name=".presentation.currencyrate.CurrencyConverterActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

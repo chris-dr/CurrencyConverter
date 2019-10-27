@@ -16,7 +16,7 @@ const val BASE_CURRENCY_POSITION = 0
 
 class CurrencyConversionAdapter(
     private val onCurrencyClicked: (position: Int) -> Unit,
-    private val onValueUpdated: (value: String) -> Unit
+    private val onBaseAmountUpdated: (value: String) -> Unit
 ) : RecyclerView.Adapter<CurrencyConversionAdapter.CurrencyRateHolder>() {
 
     var items: List<CurrencyItemWrapper> by Delegates.observable(emptyList()) { _, oldItems, newItems ->
@@ -58,9 +58,12 @@ class CurrencyConversionAdapter(
                     onCurrencyClicked(adapterPosition)
                 }
             }
-            itemView.currencyAmount.doOnTextChanged { text, _, _, _ ->
+            itemView.currencyAmount.setOnClickListener {
+                itemView.performClick()
+            }
+            itemView.currencyAmount.doOnTextChanged { input, _, _, _ ->
                 if (adapterPosition == BASE_CURRENCY_POSITION && itemView.currencyAmount.isFocused) {
-                    onValueUpdated(text.toString())
+                    onBaseAmountUpdated(input.toString())
                 }
             }
         }

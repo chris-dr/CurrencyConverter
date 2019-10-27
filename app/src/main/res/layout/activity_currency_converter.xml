@@ -5,7 +5,7 @@
     android:id="@+id/currencyRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.currencyrate.CurrencyRateActivity">
+    tools:context=".presentation.currencyrate.CurrencyConverterActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/converterAppBar"

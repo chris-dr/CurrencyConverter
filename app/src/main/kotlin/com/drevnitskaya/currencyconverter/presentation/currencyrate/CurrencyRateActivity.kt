@@ -52,21 +52,10 @@ class CurrencyRateActivity : AppCompatActivity() {
                     currencyRecyclerView.visibility = View.VISIBLE
                 }
                 adapterCurrency.items = rates
+
             })
-            notifyItemRangeUpdated.observe(this@CurrencyRateActivity, Observer { wrapper ->
-                adapterCurrency.notifyItemRangeChanged(wrapper.fromPosition, wrapper.count)
-            })
-            notifyItemRangeAmountUpdated.observe(this@CurrencyRateActivity, Observer { wrapper ->
-                adapterCurrency.notifyItemRangeChanged(
-                    wrapper.fromPosition,
-                    wrapper.count,
-                    wrapper.newAmounts
-                )
-            })
-            notifyItemMoved.observe(this@CurrencyRateActivity, Observer { wrapper ->
-                val toPosition = wrapper.toPosition
-                currencyRecyclerView.scrollToPosition(toPosition)
-                adapterCurrency.notifyItemMoved(wrapper.fromPosition, wrapper.toPosition)
+            scrollToBaseCurrency.observe(this@CurrencyRateActivity, Observer {
+                currencyRecyclerView.scrollToPosition(0)
             })
             showOfflineMode.observe(this@CurrencyRateActivity, Observer { shouldShow ->
                 TransitionManager.beginDelayedTransition(currencyRoot)
@@ -86,8 +75,14 @@ class CurrencyRateActivity : AppCompatActivity() {
             viewModel.onValueUpdated(input)
         })
         currencyRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@CurrencyRateActivity)
+            val llm = LinearLayoutManager(
+                this@CurrencyRateActivity,
+                LinearLayoutManager.VERTICAL, false
+            )
+            llm.isItemPrefetchEnabled = false
+            layoutManager = llm
             adapter = adapterCurrency
+            setHasFixedSize(true)
         }
         currencyErrorState.setOnClickListener {
             viewModel.loadRates()

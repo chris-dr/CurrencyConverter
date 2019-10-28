@@ -91,8 +91,8 @@ class CurrencyRateViewModel(
 
         this.baseCurrency = newBaseCurrency
 
-        currencyValues[BASE_CURRENCY_POSITION] = currencyValues[BASE_CURRENCY_POSITION]
-            .copy().apply { isSelected = false }
+        currencyValues[BASE_CURRENCY_POSITION] = currencyValues[BASE_CURRENCY_POSITION].copy()
+            .apply { isSelected = false }
         currencyValues.removeAt(selectedPosition)
         currencyValues.addFirst(newBaseCurrency)
 

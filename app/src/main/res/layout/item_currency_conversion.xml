@@ -21,13 +21,16 @@
         app:riv_corner_radius="40dp" />
 
     <TextView
-        android:id="@+id/testText"
+        android:id="@+id/currencyCode"
         android:layout_width="70dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/currencyFlag"
+        app:layout_constraintEnd_toStartOf="@+id/currencyAmount"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toEndOf="@+id/currencyFlag"
         app:layout_constraintTop_toTopOf="@+id/currencyFlag"
         tools:text="USD" />
@@ -40,16 +43,15 @@
         android:focusableInTouchMode="false"
         android:gravity="center_vertical|end"
         android:hint="@string/currencyConversionItem_amountHint"
+        android:imeOptions="actionDone"
         android:inputType="numberDecimal"
+        android:maxWidth="200dp"
         android:singleLine="true"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="@+id/currencyFlag"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/testText"
+        app:layout_constraintStart_toEndOf="@+id/currencyCode"
         app:layout_constraintTop_toTopOf="@+id/currencyFlag"
-        tools:text="10000000.0" />
-    <!--    android:maxLength="10"-->
-<!--    android:textStyle="bold"-->
-
+        tools:text="100.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

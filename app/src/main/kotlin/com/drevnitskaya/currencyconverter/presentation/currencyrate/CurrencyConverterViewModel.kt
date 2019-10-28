@@ -2,8 +2,9 @@ package com.drevnitskaya.currencyconverter.presentation.currencyrate
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.drevnitskaya.currencyconverter.data.entities.CurrencyItemWrapper
+import com.drevnitskaya.currencyconverter.data.entities.CurrencyConversionItem
 import com.drevnitskaya.currencyconverter.data.entities.ErrorHolder
+import com.drevnitskaya.currencyconverter.data.source.local.DEFAULT_BASE_CURRENCY_CODE
 import com.drevnitskaya.currencyconverter.domain.FetchRateUseCase
 import com.drevnitskaya.currencyconverter.extensions.addTo
 import com.drevnitskaya.currencyconverter.extensions.round
@@ -19,7 +20,6 @@ import io.reactivex.subjects.PublishSubject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-private const val DEFAULT_BASE_CURRENCY_CODE = "EUR"
 private const val DEFAULT_BASE_AMOUNT = 100.0
 private const val PERIOD_RATES_UPDATING_MS = 1000L
 private const val DEBOUNCE_TIMEOUT_MS = 300L
@@ -31,13 +31,13 @@ class CurrencyRateViewModel(
 ) : ViewModel() {
     val showProgress = MutableLiveData<Boolean>()
     val showErrorState = MutableLiveData<ErrorHolder>()
-    val setCalculatedAmounts = MutableLiveData<List<CurrencyItemWrapper>>()
+    val setCalculatedAmounts = MutableLiveData<List<CurrencyConversionItem>>()
     val scrollToBaseCurrency = SingleLiveEvent<Unit>()
     val showOfflineMode = MutableLiveData<Boolean>()
 
     private var actualRatesMap = mutableMapOf<String, Double>()
-    private var currencyValues = LinkedList<CurrencyItemWrapper>()
-    private var baseCurrency = CurrencyItemWrapper().apply {
+    private var currencyValues = LinkedList<CurrencyConversionItem>()
+    private var baseCurrency = CurrencyConversionItem().apply {
         currencyCode = DEFAULT_BASE_CURRENCY_CODE
         amount = DEFAULT_BASE_AMOUNT
         isSelected = true
@@ -152,7 +152,7 @@ class CurrencyRateViewModel(
 
     private fun calculateInitialValues() {
         val toCurrencies = actualRatesMap.map { (k, v) ->
-            CurrencyItemWrapper(
+            CurrencyConversionItem(
                 currencyCode = k,
                 amount = (v * baseCurrency.amount).round(),
                 isSelected = baseCurrency.currencyCode == k
@@ -186,7 +186,7 @@ class CurrencyRateViewModel(
     }
 
     private fun setAmounts() {
-        val tempList = mutableListOf<CurrencyItemWrapper>()
+        val tempList = mutableListOf<CurrencyConversionItem>()
         tempList.add(currencyValues[BASE_CURRENCY_POSITION])
         currencyValues.subList(BASE_CURRENCY_POSITION + 1, currencyValues.size).forEach {
             tempList.add(it.copy())

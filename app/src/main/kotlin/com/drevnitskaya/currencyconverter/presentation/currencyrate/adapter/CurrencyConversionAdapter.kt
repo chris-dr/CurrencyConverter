@@ -3,13 +3,15 @@ package com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.drevnitskaya.currencyconverter.R
-import com.drevnitskaya.currencyconverter.data.entities.CurrencyItemWrapper
+import com.drevnitskaya.currencyconverter.data.entities.CurrencyConversionItem
 import kotlinx.android.synthetic.main.item_currency_conversion.view.*
 import kotlin.properties.Delegates
 import androidx.core.widget.doOnTextChanged
+import com.drevnitskaya.currencyconverter.data.source.local.currencyFlags
 
 
 const val BASE_CURRENCY_POSITION = 0
@@ -19,7 +21,7 @@ class CurrencyConversionAdapter(
     private val onBaseAmountUpdated: (value: String) -> Unit
 ) : RecyclerView.Adapter<CurrencyConversionAdapter.CurrencyRateHolder>() {
 
-    var items: List<CurrencyItemWrapper> by Delegates.observable(emptyList()) { _, oldItems, newItems ->
+    var items: List<CurrencyConversionItem> by Delegates.observable(emptyList()) { _, oldItems, newItems ->
         val callback = ConversionDiffCallback(oldItems, newItems)
         val result = DiffUtil.calculateDiff(callback)
         result.dispatchUpdatesTo(this)
@@ -45,7 +47,7 @@ class CurrencyConversionAdapter(
         if (payloads.isEmpty() || position == BASE_CURRENCY_POSITION) {
             super.onBindViewHolder(holder, position, payloads)
         } else {
-            val item = payloads[0] as CurrencyItemWrapper
+            val item = payloads[0] as CurrencyConversionItem
             holder.updateAmount(item.amount)
             holder.updateFocus(item.isSelected)
         }
@@ -68,13 +70,16 @@ class CurrencyConversionAdapter(
             }
         }
 
-        fun bind(item: CurrencyItemWrapper) = with(itemView) {
+        fun bind(item: CurrencyConversionItem) = with(itemView) {
             testText.text = item.currencyCode
+            val flagResId = currencyFlags[item.currencyCode] ?: R.mipmap.ic_launcher
+            currencyFlag.setImageDrawable(ContextCompat.getDrawable(context, flagResId))
             val isItemSelected = item.isSelected
             if (isItemSelected) {
                 val amount = if (item.amount == 0.0) "" else "${item.amount}"
                 currencyAmount.setText(amount)
-                val inputLength = amount.length
+                val inputLength =
+                    if (amount.isBlank()) amount.length else currencyAmount.hint.length
                 currencyAmount.setSelection(inputLength)
             } else {
                 currencyAmount.setText("${item.amount}")

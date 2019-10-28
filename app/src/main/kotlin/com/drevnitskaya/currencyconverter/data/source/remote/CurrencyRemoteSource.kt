@@ -1,7 +1,6 @@
 package com.drevnitskaya.currencyconverter.data.source.remote
 
 import com.drevnitskaya.currencyconverter.data.entities.CurrencyRate
-import io.reactivex.Observable
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query

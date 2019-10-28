@@ -3,30 +3,53 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
-    android:background="@android:color/white">
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="8dp">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/currencyFlag"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_launcher_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:riv_corner_radius="40dp" />
 
     <TextView
         android:id="@+id/testText"
         android:layout_width="70dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:gravity="center"
+        android:textColor="@android:color/black"
         android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/currencyFlag"
+        app:layout_constraintStart_toEndOf="@+id/currencyFlag"
+        app:layout_constraintTop_toTopOf="@+id/currencyFlag"
         tools:text="USD" />
 
     <EditText
         android:id="@+id/currencyAmount"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:focusableInTouchMode="false"
-        android:gravity="end"
-        android:hint="0.0"
+        android:gravity="center_vertical|end"
+        android:hint="@string/currencyConversionItem_amountHint"
         android:inputType="numberDecimal"
-        android:minWidth="70dp"
+        android:singleLine="true"
+        android:textSize="22sp"
+        app:layout_constraintBottom_toBottomOf="@+id/currencyFlag"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="100.0" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/testText"
+        app:layout_constraintTop_toTopOf="@+id/currencyFlag"
+        tools:text="10000000.0" />
+    <!--    android:maxLength="10"-->
+<!--    android:textStyle="bold"-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

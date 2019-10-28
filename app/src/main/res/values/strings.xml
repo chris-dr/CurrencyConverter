@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">CurrencyConverter</string>
-    <string name="shared_noNetworkError_msg">No nerwork!</string>
-    <string name="shared_generalError_msg">General error!</string>
+    <string name="shared_noNetworkError_msg">Failed to load the content, please check your Network connection.\nTap on the screen to retry</string>
+    <string name="shared_generalError_msg">Can\'t load the content.\nTap on the screen to retry</string>
     <string name="currency_offlineMode_msg">You\'re in offline mode.\nTo get the most accurate rate please check your Network connection</string>
+    <string name="currencyConversionItem_amountHint">0.0</string>
 </resources>

@@ -2,7 +2,6 @@
 <resources>
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">@color/black20Percent</color>
-    <color name="colorAccent">#D81B60</color>
-
+    <color name="colorAccent">@android:color/holo_blue_dark</color>
     <color name="black20Percent">#33000000</color>
 </resources>

@@ -87,7 +87,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
             layoutManager = llm
             adapter = adapterCurrency
             setHasFixedSize(true)
-//            addItemDecoration(DividerItemDecoration(this@CurrencyConverterActivity, VERTICAL))
+            addItemDecoration(DividerItemDecoration(this@CurrencyConverterActivity, VERTICAL))
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     when (newState) {

@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.item_currency_conversion.view.*
 import kotlin.properties.Delegates
 import androidx.core.widget.doOnTextChanged
 import com.drevnitskaya.currencyconverter.data.source.local.currencyFlags
+import com.drevnitskaya.currencyconverter.extensions.format
 
 
 const val BASE_CURRENCY_POSITION = 0
@@ -84,7 +85,7 @@ class CurrencyConversionAdapter(
             currencyFlag.setImageDrawable(ContextCompat.getDrawable(context, flagResId))
             val isItemSelected = item.isSelected
             if (isItemSelected) {
-                val amount = if (item.amount == 0.0) "" else "${item.amount}"
+                val amount = if (item.amount == 0.0) "" else item.amount.format()
                 currencyAmount.setText(amount)
                 val inputLength = if (amount.isNotBlank()) {
                     amount.length
@@ -93,13 +94,13 @@ class CurrencyConversionAdapter(
                 }
                 currencyAmount.setSelection(inputLength)
             } else {
-                currencyAmount.setText("${item.amount}")
+                currencyAmount.setText(item.amount.format())
             }
             updateFocus(isItemSelected)
         }
 
         fun updateAmount(amount: Double) = with(itemView) {
-            currencyAmount.setText("$amount")
+            currencyAmount.setText(amount.format())
         }
 
         fun updateFocus(isItemSelected: Boolean) = with(itemView) {

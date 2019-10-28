@@ -7,7 +7,6 @@ import com.drevnitskaya.currencyconverter.data.entities.ErrorHolder
 import com.drevnitskaya.currencyconverter.data.source.local.DEFAULT_BASE_CURRENCY_CODE
 import com.drevnitskaya.currencyconverter.domain.FetchRateUseCase
 import com.drevnitskaya.currencyconverter.extensions.addTo
-import com.drevnitskaya.currencyconverter.extensions.round
 import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.BASE_CURRENCY_POSITION
 import com.drevnitskaya.currencyconverter.utils.NetworkStateProvider
 import com.drevnitskaya.currencyconverter.utils.SingleLiveEvent
@@ -154,7 +153,7 @@ class CurrencyRateViewModel(
         val toCurrencies = actualRatesMap.map { (k, v) ->
             CurrencyConversionItem(
                 currencyCode = k,
-                amount = (v * baseCurrency.amount).round(),
+                amount = (v * baseCurrency.amount),
                 isSelected = baseCurrency.currencyCode == k
             )
         }
@@ -170,7 +169,7 @@ class CurrencyRateViewModel(
             val currCode = itemWrapper.currencyCode
             if (actualRatesMap.containsKey(currCode) && currCode != baseCurrency.currencyCode) {
                 val amount = (actualRatesMap[currCode] ?: BASE_CURRENCY_RATE) * baseCurrency.amount
-                itemWrapper.amount = amount.round()
+                itemWrapper.amount = amount
             }
         }
     }

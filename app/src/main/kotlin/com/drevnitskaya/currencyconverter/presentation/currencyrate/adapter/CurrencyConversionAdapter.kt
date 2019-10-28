@@ -58,23 +58,25 @@ class CurrencyConversionAdapter(
 
     inner class CurrencyRateHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         init {
-            itemView.setOnClickListener {
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    onCurrencyClicked(adapterPosition)
+            with(itemView) {
+                setOnClickListener {
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+                        onCurrencyClicked(adapterPosition)
+                    }
                 }
-            }
-            itemView.currencyAmount.setOnClickListener {
-                itemView.performClick()
-            }
-            itemView.currencyAmount.setOnEditorActionListener { _, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    onActionDoneClicked()
+                currencyAmount.setOnClickListener {
+                    itemView.performClick()
                 }
-                true
-            }
-            itemView.currencyAmount.doOnTextChanged { input, _, _, _ ->
-                if (adapterPosition == BASE_CURRENCY_POSITION && itemView.currencyAmount.isFocused) {
-                    onBaseAmountUpdated(input.toString())
+                currencyAmount.setOnEditorActionListener { _, actionId, _ ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        onActionDoneClicked()
+                    }
+                    true
+                }
+                currencyAmount.doOnTextChanged { input, _, _, _ ->
+                    if (adapterPosition == BASE_CURRENCY_POSITION && itemView.currencyAmount.isFocused) {
+                        onBaseAmountUpdated(input.toString())
+                    }
                 }
             }
         }
@@ -87,12 +89,9 @@ class CurrencyConversionAdapter(
             if (isItemSelected) {
                 val amount = if (item.amount == 0.0) "" else item.amount.format()
                 currencyAmount.setText(amount)
-                val inputLength = if (amount.isNotBlank()) {
-                    amount.length
-                } else {
-                    currencyAmount.hint.length
+                if (amount.isNotBlank()) {
+                    currencyAmount.setSelection(amount.length)
                 }
-                currencyAmount.setSelection(inputLength)
             } else {
                 currencyAmount.setText(item.amount.format())
             }

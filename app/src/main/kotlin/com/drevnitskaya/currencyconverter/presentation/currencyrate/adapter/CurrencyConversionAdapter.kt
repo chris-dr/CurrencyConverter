@@ -14,14 +14,14 @@ import kotlin.properties.Delegates
 import androidx.core.widget.doOnTextChanged
 import com.drevnitskaya.currencyconverter.data.source.local.currencyFlags
 import com.drevnitskaya.currencyconverter.extensions.format
+import com.drevnitskaya.currencyconverter.extensions.showSoftKeyboard
 
 
 const val BASE_CURRENCY_POSITION = 0
 
 class CurrencyConversionAdapter(
     private val onCurrencyClicked: (position: Int) -> Unit,
-    private val onBaseAmountUpdated: (value: String) -> Unit,
-    private val onActionDoneClicked: () -> Unit
+    private val onBaseAmountUpdated: (value: String) -> Unit
 ) : RecyclerView.Adapter<CurrencyConversionAdapter.CurrencyRateHolder>() {
 
     var items: List<CurrencyConversionItem> by Delegates.observable(emptyList()) { _, oldItems, newItems ->
@@ -67,12 +67,6 @@ class CurrencyConversionAdapter(
                 currencyAmount.setOnClickListener {
                     itemView.performClick()
                 }
-                currencyAmount.setOnEditorActionListener { _, actionId, _ ->
-                    if (actionId == EditorInfo.IME_ACTION_DONE) {
-                        onActionDoneClicked()
-                    }
-                    true
-                }
                 currencyAmount.doOnTextChanged { input, _, _, _ ->
                     if (adapterPosition == BASE_CURRENCY_POSITION && itemView.currencyAmount.isFocused) {
                         onBaseAmountUpdated(input.toString())
@@ -106,6 +100,7 @@ class CurrencyConversionAdapter(
             if (isItemSelected) {
                 currencyAmount.isFocusableInTouchMode = true
                 currencyAmount.requestFocus()
+                currencyAmount.showSoftKeyboard()
             } else {
                 currencyAmount.isFocusableInTouchMode = false
                 currencyAmount.clearFocus()

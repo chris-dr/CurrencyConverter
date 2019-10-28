@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.*
 import com.drevnitskaya.currencyconverter.R
-import com.drevnitskaya.currencyconverter.extensions.hideSoftKeyboard
 import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.BASE_CURRENCY_POSITION
 import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.CurrencyConversionAdapter
 import kotlinx.android.synthetic.main.activity_currency_converter.*
@@ -76,8 +75,6 @@ class CurrencyConverterActivity : AppCompatActivity() {
             viewModel.onCurrencyClicked(item)
         }, onBaseAmountUpdated = { input ->
             viewModel.onBaseAmountUpdated(input)
-        }, onActionDoneClicked = {
-            hideSoftKeyboard()
         })
         currencyRecyclerView.apply {
             val llm = LinearLayoutManager(

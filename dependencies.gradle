@@ -14,10 +14,6 @@ ext {
     koin = "org.koin:koin-android:$koinVersion"
     koin_viewmodel = "org.koin:koin-android-viewmodel:$koinVersion"
 
-    glideVersion = '4.9.0'
-    glide = "com.github.bumptech.glide:glide:$glideVersion"
-    glide_kapt = "com.github.bumptech.glide:compiler:$glideVersion"
-
     retrofitVersion = "2.6.0"
     retrofit = [
             retrofit      : "com.squareup.retrofit2:retrofit:$retrofitVersion",

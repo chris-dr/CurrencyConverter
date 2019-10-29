@@ -5,8 +5,8 @@ import com.drevnitskaya.currencyconverter.data.source.remote.CurrencyRemoteSourc
 import com.drevnitskaya.currencyconverter.framework.api.BaseOkHttpClientBuilder
 import com.drevnitskaya.currencyconverter.framework.api.BASE_URL_CONVERTER
 import com.drevnitskaya.currencyconverter.framework.api.BaseRetrofitClientFactory
-import com.drevnitskaya.currencyconverter.utils.NetworkStateProvider
-import com.drevnitskaya.currencyconverter.utils.NetworkStateProviderImpl
+import com.drevnitskaya.currencyconverter.framework.NetworkStateProvider
+import com.drevnitskaya.currencyconverter.framework.NetworkStateProviderImpl
 import okhttp3.Interceptor
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.qualifier.named
@@ -20,8 +20,7 @@ const val DI_NAME_BASE_URL = "di_name_base_url"
 const val DI_HTTP_LOG_INTERCEPTOR = "di_logging_interceptor"
 
 val appModule = module {
-
-    single(named(DI_NAME_BASE_URL)) { BASE_URL_CONVERTER }
+    factory(named(DI_NAME_BASE_URL)) { BASE_URL_CONVERTER }
     factory {
         BaseOkHttpClientBuilder().init()
     }
@@ -32,7 +31,7 @@ val appModule = module {
         }
     }
 
-    single<List<Interceptor>> {
+    factory<List<Interceptor>> {
         if (BuildConfig.DEBUG) {
             listOf(get(named(DI_HTTP_LOG_INTERCEPTOR)))
         } else {
@@ -40,11 +39,11 @@ val appModule = module {
         }
     }
 
-    single<CallAdapter.Factory> { RxJava2CallAdapterFactory.create() }
+    factory<CallAdapter.Factory> { RxJava2CallAdapterFactory.create() }
 
-    single<Converter.Factory> { GsonConverterFactory.create() }
+    factory<Converter.Factory> { GsonConverterFactory.create() }
 
-    factory<CurrencyRemoteSource> {
+    single<CurrencyRemoteSource> {
         BaseRetrofitClientFactory(
             baseOkHttpClientBuilder = get(),
             callAdapterFactory = get(),
@@ -54,5 +53,9 @@ val appModule = module {
         ).build()
     }
 
-    single<NetworkStateProvider> { NetworkStateProviderImpl(context = get()) }
+    single<NetworkStateProvider> {
+        NetworkStateProviderImpl(
+            context = get()
+        )
+    }
 }

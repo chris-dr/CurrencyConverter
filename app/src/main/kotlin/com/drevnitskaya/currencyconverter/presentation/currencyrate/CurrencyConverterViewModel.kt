@@ -1,14 +1,16 @@
 package com.drevnitskaya.currencyconverter.presentation.currencyrate
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.drevnitskaya.currencyconverter.data.entities.CurrencyConversionItem
+import com.drevnitskaya.currencyconverter.data.entities.DEFAULT_BASE_AMOUNT
 import com.drevnitskaya.currencyconverter.data.entities.ErrorHolder
 import com.drevnitskaya.currencyconverter.data.source.local.DEFAULT_BASE_CURRENCY_CODE
 import com.drevnitskaya.currencyconverter.domain.FetchRatesUseCase
 import com.drevnitskaya.currencyconverter.extensions.addTo
 import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.BASE_CURRENCY_POSITION
-import com.drevnitskaya.currencyconverter.utils.NetworkStateProvider
+import com.drevnitskaya.currencyconverter.framework.NetworkStateProvider
 import com.drevnitskaya.currencyconverter.utils.SingleLiveEvent
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -19,7 +21,6 @@ import io.reactivex.subjects.PublishSubject
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-private const val DEFAULT_BASE_AMOUNT = 100.0
 private const val PERIOD_RATES_UPDATING_MS = 1000L
 private const val DEBOUNCE_TIMEOUT_MS = 300L
 private const val BASE_CURRENCY_RATE = 1.0
@@ -28,11 +29,16 @@ class CurrencyRateViewModel(
     private val networkStateProvider: NetworkStateProvider,
     private val fetchRatesUseCase: FetchRatesUseCase
 ) : ViewModel() {
-    val showProgress = MutableLiveData<Boolean>()
-    val showErrorState = MutableLiveData<ErrorHolder>()
-    val setCalculatedAmounts = MutableLiveData<List<CurrencyConversionItem>>()
-    val scrollToBaseCurrency = SingleLiveEvent<Unit>()
-    val showOfflineMode = MutableLiveData<Boolean>()
+    private val showProgress = MutableLiveData<Boolean>()
+    fun getShowProgress(): LiveData<Boolean> = showProgress
+    private val showErrorState = MutableLiveData<ErrorHolder>()
+    fun getShowErrorState(): LiveData<ErrorHolder> = showErrorState
+    private val setCalculatedAmounts = MutableLiveData<List<CurrencyConversionItem>>()
+    fun getCalculatedAmounts(): LiveData<List<CurrencyConversionItem>> = setCalculatedAmounts
+    private val scrollToBaseCurrency = SingleLiveEvent<Unit>()
+    fun getScrollToBaseCurrency(): LiveData<Unit> = scrollToBaseCurrency
+    private val showOfflineMode = MutableLiveData<Boolean>()
+    fun getShowOfflineMode(): LiveData<Boolean> = showOfflineMode
 
     private var actualRatesMap = mutableMapOf<String, Double>()
     private var currencyValues = LinkedList<CurrencyConversionItem>()
@@ -82,22 +88,13 @@ class CurrencyRateViewModel(
 
         val newBaseCurrency = currencyValues[selectedPosition]
         newBaseCurrency.isSelected = true
-
-        val newBaseRate = actualRatesMap[newBaseCurrency.currencyCode] ?: BASE_CURRENCY_RATE
-        val newBaseCurrCode = newBaseCurrency.currencyCode
-        actualRatesMap[baseCurrency.currencyCode] = 1 / newBaseRate
-        actualRatesMap[newBaseCurrCode] = BASE_CURRENCY_RATE
-
+        calculatePrevCurrencyRate(newBaseCurrency)
         this.baseCurrency = newBaseCurrency
+        swapCurrencies(selectedPosition, newBaseCurrency)
 
-        currencyValues[BASE_CURRENCY_POSITION] = currencyValues[BASE_CURRENCY_POSITION].copy()
-            .apply { isSelected = false }
-        currencyValues.removeAt(selectedPosition)
-        currencyValues.addFirst(newBaseCurrency)
+        updateExistingAmounts()
 
-        updateExistingValues()
-
-        setAmounts()
+        setCalculatedAmounts()
         scrollToBaseCurrency.call()
 
         startRatesUpdating()
@@ -117,6 +114,20 @@ class CurrencyRateViewModel(
         }
     }
 
+    private fun calculatePrevCurrencyRate(newBaseCurrency: CurrencyConversionItem) {
+        val newBaseRate = actualRatesMap[newBaseCurrency.currencyCode] ?: BASE_CURRENCY_RATE
+        val newBaseCurrCode = newBaseCurrency.currencyCode
+        actualRatesMap[baseCurrency.currencyCode] = 1 / newBaseRate
+        actualRatesMap[newBaseCurrCode] = BASE_CURRENCY_RATE
+    }
+
+    private fun swapCurrencies(selectedPosition: Int, newBaseCurrency: CurrencyConversionItem) {
+        currencyValues[BASE_CURRENCY_POSITION] = currencyValues[BASE_CURRENCY_POSITION].copy()
+            .apply { isSelected = false }
+        currencyValues.removeAt(selectedPosition)
+        currencyValues.addFirst(newBaseCurrency)
+    }
+
     private fun startRatesUpdating() {
         updRatesDisposable = Observable.interval(PERIOD_RATES_UPDATING_MS, TimeUnit.MILLISECONDS)
             .observeOn(Schedulers.io())
@@ -133,23 +144,23 @@ class CurrencyRateViewModel(
                 }
                 if (initialLoading) {
                     initialLoading = false
-                    calculateInitialValues()
+                    calculateInitialAmounts()
                 } else {
-                    updateExistingValues()
+                    updateExistingAmounts()
                 }
             }
             .retry()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 showProgress.value = false
-                setAmounts()
+                setCalculatedAmounts()
             }, {
                 showProgress.value = true
                 showErrorState.value = ErrorHolder.GeneralError()
             })
     }
 
-    private fun calculateInitialValues() {
+    private fun calculateInitialAmounts() {
         val toCurrencies = actualRatesMap.map { (k, v) ->
             CurrencyConversionItem(
                 currencyCode = k,
@@ -164,7 +175,7 @@ class CurrencyRateViewModel(
         }
     }
 
-    private fun updateExistingValues() {
+    private fun updateExistingAmounts() {
         currencyValues.forEach { itemWrapper ->
             val currCode = itemWrapper.currencyCode
             if (actualRatesMap.containsKey(currCode) && currCode != baseCurrency.currencyCode) {
@@ -177,14 +188,12 @@ class CurrencyRateViewModel(
     private fun recalculateAmounts(input: String) {
         updRatesDisposable?.dispose()
         baseCurrency.amount = if (input.isEmpty()) .0 else input.toDouble()
-        updateExistingValues()
-
-        setAmounts()
-
+        updateExistingAmounts()
+        setCalculatedAmounts()
         startRatesUpdating()
     }
 
-    private fun setAmounts() {
+    private fun setCalculatedAmounts() {
         val tempList = mutableListOf<CurrencyConversionItem>()
         tempList.add(currencyValues[BASE_CURRENCY_POSITION])
         currencyValues.subList(BASE_CURRENCY_POSITION + 1, currencyValues.size).forEach {

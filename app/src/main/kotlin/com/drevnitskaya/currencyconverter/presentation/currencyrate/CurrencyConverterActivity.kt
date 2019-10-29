@@ -37,10 +37,10 @@ class CurrencyConverterActivity : AppCompatActivity() {
     }
 
     private fun initViewModel() = with(viewModel) {
-        showProgress.observe(this@CurrencyConverterActivity, Observer { shouldShow ->
+        getShowProgress().observe(this@CurrencyConverterActivity, Observer { shouldShow ->
             currencyProgress.visibility = if (shouldShow) View.VISIBLE else View.GONE
         })
-        showErrorState.observe(this@CurrencyConverterActivity, Observer { error ->
+        getShowErrorState().observe(this@CurrencyConverterActivity, Observer { error ->
             currencyErrorState.visibility = if (error != null) {
                 currencyErrorState.setText(error.errorMsgResId)
                 TransitionManager.beginDelayedTransition(currencyRoot)
@@ -49,7 +49,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
                 View.GONE
             }
         })
-        setCalculatedAmounts.observe(this@CurrencyConverterActivity, Observer { rates ->
+        getCalculatedAmounts().observe(this@CurrencyConverterActivity, Observer { rates ->
             if (currencyRecyclerView.visibility == View.GONE) {
                 TransitionManager.beginDelayedTransition(currencyRoot)
                 currencyRecyclerView.visibility = View.VISIBLE
@@ -57,10 +57,10 @@ class CurrencyConverterActivity : AppCompatActivity() {
             adapterCurrency.items = rates
 
         })
-        scrollToBaseCurrency.observe(this@CurrencyConverterActivity, Observer {
+        getScrollToBaseCurrency().observe(this@CurrencyConverterActivity, Observer {
             currencyRecyclerView.scrollToPosition(BASE_CURRENCY_POSITION)
         })
-        showOfflineMode.observe(this@CurrencyConverterActivity, Observer { shouldShow ->
+        getShowOfflineMode().observe(this@CurrencyConverterActivity, Observer { shouldShow ->
             TransitionManager.beginDelayedTransition(currencyRoot)
             currencyOfflineMode.visibility = if (shouldShow) {
                 View.VISIBLE

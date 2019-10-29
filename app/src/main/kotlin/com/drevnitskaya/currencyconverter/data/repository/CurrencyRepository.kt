@@ -11,7 +11,6 @@ interface CurrencyRepository {
 class CurrencyRepositoryImpl(
     private val remoteDataSource: CurrencyRemoteSource
 ) : CurrencyRepository {
-    override fun getCurrencyRates(currencyCode: String): Single<CurrencyRate> {
-        return remoteDataSource.getCurrencyRates(currencyCode)
-    }
+    override fun getCurrencyRates(currencyCode: String) =
+        remoteDataSource.getCurrencyRates(currencyCode)
 }

@@ -11,7 +11,6 @@ interface FetchRatesUseCase {
 class FetchRatesUseCaseImpl(
     private val currencyRepository: CurrencyRepository
 ) : FetchRatesUseCase {
-    override fun execute(currencyCode: String): Single<CurrencyRate> {
-        return currencyRepository.getCurrencyRates(currencyCode)
-    }
+    override fun execute(currencyCode: String) =
+        currencyRepository.getCurrencyRates(currencyCode)
 }

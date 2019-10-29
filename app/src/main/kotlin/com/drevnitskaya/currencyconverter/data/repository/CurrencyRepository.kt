@@ -5,13 +5,13 @@ import com.drevnitskaya.currencyconverter.data.source.remote.CurrencyRemoteSourc
 import io.reactivex.Single
 
 interface CurrencyRepository {
-    fun getInitialCurrencyRate(currCode: String): Single<CurrencyRate>
+    fun getCurrencyRates(currencyCode: String): Single<CurrencyRate>
 }
 
 class CurrencyRepositoryImpl(
     private val remoteDataSource: CurrencyRemoteSource
 ) : CurrencyRepository {
-    override fun getInitialCurrencyRate(currCode: String): Single<CurrencyRate> {
-        return remoteDataSource.getCurrencyRate(currCode)
+    override fun getCurrencyRates(currencyCode: String): Single<CurrencyRate> {
+        return remoteDataSource.getCurrencyRates(currencyCode)
     }
 }

@@ -4,14 +4,14 @@ import com.drevnitskaya.currencyconverter.data.entities.CurrencyRate
 import com.drevnitskaya.currencyconverter.data.repository.CurrencyRepository
 import io.reactivex.Single
 
-interface FetchRateUseCase {
+interface FetchRatesUseCase {
     fun execute(currencyCode: String): Single<CurrencyRate>
 }
 
-class FetchRateUseCaseImpl(
+class FetchRatesUseCaseImpl(
     private val currencyRepository: CurrencyRepository
-) : FetchRateUseCase {
+) : FetchRatesUseCase {
     override fun execute(currencyCode: String): Single<CurrencyRate> {
-        return currencyRepository.getInitialCurrencyRate(currencyCode)
+        return currencyRepository.getCurrencyRates(currencyCode)
     }
 }

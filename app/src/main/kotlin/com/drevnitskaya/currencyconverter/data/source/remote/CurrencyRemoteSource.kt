@@ -7,5 +7,5 @@ import retrofit2.http.Query
 
 interface CurrencyRemoteSource {
     @GET("latest")
-    fun getCurrencyRate(@Query("base") currCode: String): Single<CurrencyRate>
+    fun getCurrencyRates(@Query("base") currCode: String): Single<CurrencyRate>
 }

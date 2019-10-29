@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.drevnitskaya.currencyconverter.data.entities.CurrencyConversionItem
 import com.drevnitskaya.currencyconverter.data.entities.ErrorHolder
 import com.drevnitskaya.currencyconverter.data.source.local.DEFAULT_BASE_CURRENCY_CODE
-import com.drevnitskaya.currencyconverter.domain.FetchRateUseCase
+import com.drevnitskaya.currencyconverter.domain.FetchRatesUseCase
 import com.drevnitskaya.currencyconverter.extensions.addTo
 import com.drevnitskaya.currencyconverter.presentation.currencyrate.adapter.BASE_CURRENCY_POSITION
 import com.drevnitskaya.currencyconverter.utils.NetworkStateProvider
@@ -26,7 +26,7 @@ private const val BASE_CURRENCY_RATE = 1.0
 
 class CurrencyRateViewModel(
     private val networkStateProvider: NetworkStateProvider,
-    private val fetchRateUseCase: FetchRateUseCase
+    private val fetchRatesUseCase: FetchRatesUseCase
 ) : ViewModel() {
     val showProgress = MutableLiveData<Boolean>()
     val showErrorState = MutableLiveData<ErrorHolder>()
@@ -125,7 +125,7 @@ class CurrencyRateViewModel(
                 showOfflineMode.postValue(isOnline.not())
                 isOnline
             }
-            .flatMapSingle { fetchRateUseCase.execute(currencyCode = baseCurrency.currencyCode) }
+            .flatMapSingle { fetchRatesUseCase.execute(currencyCode = baseCurrency.currencyCode) }
             .observeOn(Schedulers.computation())
             .map { rateResponse ->
                 rateResponse.rates?.let {

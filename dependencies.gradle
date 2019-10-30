@@ -30,8 +30,11 @@ ext {
     mockitoVersion = '2.1.0'
     junitVersion = '4.12'
     testing = [
+            junit          : "junit:junit:$junitVersion",
             arch           : "androidx.arch.core:core-testing:$archVersion",
+            mockito_core   : "org.mockito:mockito-core:2.27.0",
             mockito_kotlin2: "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoVersion",
-            junit          : "junit:junit:$junitVersion"
+            hamcrest       : "org.hamcrest:hamcrest-all:1.3"
+
     ]
 }

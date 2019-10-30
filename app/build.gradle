@@ -27,7 +27,7 @@ android {
 dependencies {
     def ext = rootProject.ext
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation ext.support.appcompatv7
     implementation ext.support.design
@@ -47,4 +47,10 @@ dependencies {
     implementation ext.logging_interceptor
 
     implementation ext.rxandroid
+
+    testImplementation ext.testing.junit
+    testImplementation ext.testing.arch
+    testImplementation ext.testing.mockito_core
+    testImplementation ext.testing.mockito_kotlin2
+    testImplementation ext.testing.hamcrest
 }
